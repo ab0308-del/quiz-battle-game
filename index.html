@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>不打不相識 ⚔️ 六年級自然科對戰複習</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
+      background: #1a0000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ═══════════════════════════════════════ TITLE SCREEN */
+    #titleScreen {
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, #3a0a0a 0%, #0d0000 100%);
+      position: relative; overflow: hidden;
+    }
+
+    .title-particles { position: absolute; inset: 0; pointer-events: none; }
+
+    .title-logo {
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 900;
+      color: #FFD700;
+      text-shadow: 0 0 30px #ff6600, 4px 4px 0 #8B0000, 8px 8px 0 #5a0000;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.3em;
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { text-shadow: 0 0 30px #ff6600, 4px 4px 0 #8B0000, 8px 8px 0 #5a0000; }
+      50% { text-shadow: 0 0 50px #ffaa00, 4px 4px 0 #aa0000, 8px 8px 0 #880000; }
+    }
+
+    .title-sub {
+      color: #ff9933;
+      font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+      margin-bottom: 2.5em;
+      letter-spacing: 0.1em;
+    }
+
+    .name-row {
+      display: flex; gap: clamp(1.5rem, 5vw, 4rem);
+      margin-bottom: 2em;
+    }
+
+    .player-box {
+      display: flex; flex-direction: column; align-items: center; gap: 0.5em;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 12px;
+      padding: 1.2em 1.8em;
+    }
+
+    .player-box label {
+      color: #FFD700; font-size: 1rem; font-weight: bold;
+    }
+
+    .player-box input {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid #FFD700;
+      color: #fff;
+      font-size: 1.3rem;
+      padding: 0.4em 0.8em;
+      text-align: center;
+      border-radius: 8px;
+      width: 140px;
+      outline: none;
+    }
+
+    .player-box input:focus { border-color: #ff9900; box-shadow: 0 0 10px rgba(255,153,0,0.4); }
+    .key-label { color: #aaa; font-size: 0.85rem; }
+    .p1-color { color: #66aaff; }
+    .p2-color { color: #ccddff; }
+
+    .start-btn {
+      background: linear-gradient(135deg, #cc0000, #ff4400);
+      color: white;
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      font-weight: 900;
+      padding: 0.7em 3em;
+      border: none; border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      box-shadow: 0 5px 25px rgba(255,80,0,0.5);
+      transition: all 0.2s;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.06) translateY(-2px);
+      box-shadow: 0 8px 35px rgba(255,80,0,0.7);
+    }
+
+    .title-info {
+      margin-top: 2em;
+      color: #666;
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .title-info b { color: #FFD700; }
+
+    /* ═══════════════════════════════════════ GAME SCREEN */
+    #gameScreen {
+      width: 100vw; height: 100vh;
+      display: none; flex-direction: column;
+    }
+
+    /* HP BAR AREA */
+    #hpArea {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(to bottom, #6a0000, #4a0000);
+      padding: 8px 12px;
+      border-bottom: 3px solid #2a0000;
+      flex-shrink: 0;
+    }
+
+    .hp-wrap { flex: 1; position: relative; }
+
+    .hp-track {
+      height: 22px;
+      background: #1a0000;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #550000;
+    }
+
+    #hp1fill {
+      height: 100%; width: 100%;
+      background: linear-gradient(to right, #00cc00, #88ff00);
+      border-radius: 4px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    #hp2fill {
+      height: 100%; width: 100%;
+      background: linear-gradient(to left, #00cc00, #88ff00);
+      border-radius: 4px;
+      float: right;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    .hp-label {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.8); font-size: 0.65rem; font-weight: bold;
+      pointer-events: none; z-index: 1;
+    }
+    #hpnum1 { right: 4px; }
+    #hpnum2 { left: 4px; }
+
+    #centerInfo {
+      color: #FFD700; font-size: 1rem; font-weight: bold;
+      white-space: nowrap; padding: 0 8px; text-align: center;
+      min-width: 80px;
+    }
+
+    /* BATTLE AREA */
+    #battleArea {
+      flex: 1; position: relative; overflow: hidden;
+      min-height: 120px;
+    }
+
+    #battleCanvas { width: 100%; height: 100%; display: block; }
+
+    .fighter-badge {
+      position: absolute; bottom: 36%;
+      background: rgba(0,30,120,0.92);
+      border: 2px solid rgba(255,255,255,0.6);
+      color: white; font-size: clamp(0.85rem, 2vw, 1.1rem);
+      font-weight: bold; padding: 2px 10px; border-radius: 5px;
+      pointer-events: none;
+    }
+
+    #badge1 { left: 12%; }
+    #badge2 { right: 12%; }
+
+    /* MSG POPUP */
+    #msgPopup {
+      position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.88); color: #FFD700;
+      font-size: clamp(1rem, 3vw, 1.8rem); font-weight: bold;
+      padding: 0.5em 1.5em; border-radius: 12px;
+      border: 2px solid #FFD700;
+      display: none; z-index: 50; white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* QUIZ AREA */
+    #quizArea {
+      display: flex;
+      background: #0d2a0d;
+      flex-shrink: 0;
+      height: 52vh;
+      border-top: 3px solid #1a5a1a;
+    }
+
+    .quiz-panel {
+      flex: 1; padding: 10px 16px 8px;
+      color: #FFD700; position: relative;
+      overflow: hidden;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    #qpanel1 { border-right: 3px solid #1a5a1a; }
+
+    .q-timer-bar {
+      height: 4px;
+      background: #FFD700;
+      border-radius: 2px;
+      transition: width 0.2s linear;
+      flex-shrink: 0;
+    }
+
+    .q-player-name {
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-weight: bold; flex-shrink: 0;
+      padding-bottom: 2px;
+      border-bottom: 1px solid rgba(255,215,0,0.3);
+    }
+
+    .q-text {
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      line-height: 1.5;
+      flex: 1;
+      display: flex; align-items: center;
+    }
+
+    .q-options { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+
+    .q-opt {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: clamp(0.75rem, 1.8vw, 0.95rem);
+      padding: 4px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: 1px solid transparent;
+      line-height: 1.35;
+    }
+
+    .q-opt:hover { background: rgba(255,215,0,0.08); }
+    .q-opt.correct { background: rgba(0,220,0,0.18) !important; border-color: #00dd00; color: #88ff88; }
+    .q-opt.wrong   { background: rgba(220,0,0,0.18) !important; border-color: #dd0000; color: #ff8888; text-decoration: line-through; }
+    .q-opt.selected { border-color: #FFD700; }
+
+    .opt-circle {
+      width: 24px; height: 24px; flex-shrink: 0;
+      border: 2px solid #FFD700; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: bold;
+    }
+
+    .q-keyhint {
+      font-size: 0.7rem; color: #555;
+      flex-shrink: 0; text-align: center;
+    }
+
+    /* STUN OVERLAY */
+    .stun-cover {
+      position: absolute; inset: 0;
+      background: rgba(180,0,0,0.18);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 6px;
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: #ff4444; font-weight: bold;
+      pointer-events: all;
+      z-index: 10;
+    }
+    .stun-cover.on { display: flex; }
+    .stun-count { font-size: 2.5em; line-height: 1; }
+
+    /* ═══════════════════════════════════════ RESULT SCREEN */
+    #resultScreen {
+      width: 100vw; height: 100vh;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, #3a0a0a 0%, #0d0000 100%);
+    }
+
+    .win-text {
+      font-size: clamp(2rem, 8vw, 5rem);
+      font-weight: 900; color: #FFD700;
+      text-shadow: 0 0 40px #ff6600;
+      margin-bottom: 0.5em;
+      animation: winBounce 0.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes winBounce {
+      from { transform: scale(1) rotate(-1deg); }
+      to   { transform: scale(1.05) rotate(1deg); }
+    }
+
+    .win-score { color: #ddd; font-size: clamp(1rem, 3vw, 1.4rem); margin-bottom: 2em; }
+
+    .res-btns { display: flex; gap: 1em; flex-wrap: wrap; justify-content: center; }
+
+    .res-btn {
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+      font-weight: bold; padding: 0.7em 2.5em;
+      border: none; border-radius: 50px; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .res-btn:hover { transform: scale(1.05); }
+    .btn-play { background: linear-gradient(135deg, #006600, #00bb00); color: white; box-shadow: 0 4px 20px rgba(0,150,0,0.5); }
+    .btn-home { background: linear-gradient(135deg, #444, #222); color: #ccc; }
+
+    /* ═══════════════════════════════════════ HIT EFFECT */
+    .hit-spark {
+      position: absolute; pointer-events: none;
+      font-size: 2rem; z-index: 30;
+      animation: sparkFly 0.7s ease-out forwards;
+    }
+    @keyframes sparkFly {
+      0%   { opacity: 1; transform: scale(0.5) translate(0,0); }
+      100% { opacity: 0; transform: scale(1.8) translate(var(--dx), var(--dy)); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════ TITLE SCREEN -->
+<div id="titleScreen">
+  <div class="title-logo">不打不相識</div>
+  <div class="title-sub">⚡ 六年級自然科 雙人對戰複習遊戲 ⚡</div>
+
+  <div class="name-row">
+    <div class="player-box">
+      <label class="p1-color">🥊 玩家一（左）</label>
+      <input id="p1name" type="text" value="玩家一" maxlength="8">
+      <span class="key-label">按鍵：<b style="color:#FFD700">1 2 3 4</b></span>
+    </div>
+    <div class="player-box">
+      <label class="p2-color">⚔️ 玩家二（右）</label>
+      <input id="p2name" type="text" value="玩家二" maxlength="8">
+      <span class="key-label">按鍵：<b style="color:#FFD700">7 8 9 0</b></span>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">⚔️ 開始對戰！</button>
+
+  <div class="title-info">
+    答對 → 攻擊對方 💥 &nbsp;|&nbsp; 答錯 → 暈眩 3 秒 😵 &nbsp;|&nbsp; HP 歸零 → 落敗！<br>
+    <b>題庫：六年級自然科 57 題</b>（隨機出題，答完自動換題）
+  </div>
+</div>
+
+<!-- ════════════════════════ GAME SCREEN -->
+<div id="gameScreen">
+
+  <!-- HP Bars -->
+  <div id="hpArea">
+    <div class="hp-wrap">
+      <div class="hp-track">
+        <div id="hp1fill"></div>
+      </div>
+      <span class="hp-label" id="hpnum1">100</span>
+    </div>
+    <div id="centerInfo">⚔️</div>
+    <div class="hp-wrap">
+      <div class="hp-track">
+        <div id="hp2fill"></div>
+      </div>
+      <span class="hp-label" id="hpnum2">100</span>
+    </div>
+  </div>
+
+  <!-- Battle Arena -->
+  <div id="battleArea">
+    <canvas id="battleCanvas"></canvas>
+    <div class="fighter-badge" id="badge1">玩家一 製作</div>
+    <div class="fighter-badge" id="badge2">玩家二 製作</div>
+    <div id="msgPopup"></div>
+  </div>
+
+  <!-- Quiz Panels -->
+  <div id="quizArea">
+
+    <!-- Player 1 -->
+    <div class="quiz-panel" id="qpanel1">
+      <div class="q-timer-bar" id="timer1" style="width:100%"></div>
+      <div class="q-player-name p1-color" id="qlabel1">玩家一</div>
+      <div class="q-text" id="qtext1">載入中…</div>
+      <div class="q-options" id="qopts1"></div>
+      <div class="q-keyhint">鍵盤按 <b>1 2 3 4</b> 選擇答案　或直接點選</div>
+      <div class="stun-cover" id="stun1">
+        <div>😵 答錯了！</div>
+        <div class="stun-count" id="stunnum1">3</div>
+        <div style="font-size:0.7em">秒後恢復</div>
+      </div>
+    </div>
+
+    <!-- Player 2 -->
+    <div class="quiz-panel" id="qpanel2">
+      <div class="q-timer-bar" id="timer2" style="width:100%"></div>
+      <div class="q-player-name p2-color" id="qlabel2" style="text-align:right">玩家二</div>
+      <div class="q-text" id="qtext2">載入中…</div>
+      <div class="q-options" id="qopts2"></div>
+      <div class="q-keyhint">鍵盤按 <b>7 8 9 0</b> 選擇答案　或直接點選</div>
+      <div class="stun-cover" id="stun2">
+        <div>😵 答錯了！</div>
+        <div class="stun-count" id="stunnum2">3</div>
+        <div style="font-size:0.7em">秒後恢復</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════ RESULT SCREEN -->
+<div id="resultScreen">
+  <div class="win-text" id="winText">🎉 玩家一獲勝！</div>
+  <div class="win-score" id="winScore"></div>
+  <div class="res-btns">
+    <button class="res-btn btn-play" onclick="startGame()">🔄 再來一場！</button>
+    <button class="res-btn btn-home" onclick="showTitle()">🏠 回主選單</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  QUESTION BANK  (六年級自然科 57 題)
+// ════════════════════════════════════════════════════════════
+const QUESTIONS = [
+  { q:"2050淨零排放的目標是？", opts:["溫室氣體的排放量與吸收量達到平衡","完全停止所有工業生產","禁止使用所有化石燃料","將大氣中的二氧化碳完全清除"], a:0 },
+  { q:"人類哪種活動會讓生物失去棲地，甚至導致物種瀕臨滅絕，同時增加二氧化碳排放？", opts:["濫砍森林","超抽地下水","濫噴農藥","填海造陸"], a:0 },
+  { q:"人類排放過多溫室氣體，導致全球暖化，進而造成的影響是？", opts:["氣候變遷","臭氧層增厚","生物多樣性增加","海平面下降"], a:0 },
+  { q:"下列何者可以讓同一把直笛發出較高的音調？", opts:["按住較少的音孔","按住較多的音孔","用更大的力氣吹氣","換更長的直笛"], a:0 },
+  { q:"下列哪一項是聲音的三要素？", opts:["音色、響度、音調","音量、音速、音色","頻率、振幅、波長","高低、大小、快慢"], a:0 },
+  { q:"下列哪一種不屬於水域生態系？", opts:["草原生態系","海洋生態系","河口生態系","淡水生態系"], a:0 },
+  { q:"下列哪一種是臺灣常見的外來入侵種？", opts:["福壽螺","臺灣黑熊","玉山薔薇","水筆仔"], a:0 },
+  { q:"下列哪一種屬於再生能源？", opts:["太陽能","煤炭","天然氣","石油"], a:0 },
+  { q:"下列哪種生物是臺灣森林生態系中常見的動物？", opts:["臺灣黑熊","企鵝","北極熊","長頸鹿"], a:0 },
+  { q:"下列哪種自製樂器是利用弦振動發聲的原理？", opts:["紙盒吉他","吸管排笛","氣球鼓","玻璃瓶琴"], a:0 },
+  { q:"下列哪種樂器屬於弦樂器？", opts:["烏克麗麗","直笛","鐵琴","小鼓"], a:0 },
+  { q:"下列關於自製簡易樂器的敘述，何者正確？", opts:["吸管愈長，空氣柱愈長，音調愈低","吸管愈長，空氣柱愈長，音調愈高","橡皮筋愈緊，音調愈低","鼓面愈大，音調愈高"], a:0 },
+  { q:"下列關於直笛發聲的敘述，何者正確？", opts:["按住較多音孔，空氣柱較長，音調較低","按住較多音孔，空氣柱較短，音調較高","空氣柱愈長，音調愈高","空氣柱愈短，音調愈低"], a:0 },
+  { q:"下列關於聲音性質的敘述，何者正確？", opts:["演奏力量愈大，響度愈大","空氣柱愈長，音調愈高","琴弦愈細，音調愈低","琴鍵愈短，音調愈低"], a:0 },
+  { q:"不同樂器發出聲音各有其獨特的特質，這種特質稱為？", opts:["音色","音調","響度","音量"], a:0 },
+  { q:"水足跡是指？", opts:["生產商品或服務過程中所消耗的水資源總量","人類每天喝水的量","河川流量的總和","降雨量的多少"], a:0 },
+  { q:"外來入侵種的共同特徵是？", opts:["適應性高、生長快速、繁殖力強、沒有天敵","體型較大、行動緩慢、食量小","只能在特定環境中生存","對環境沒有影響"], a:0 },
+  { q:"外來種的定義是？", opts:["原產於其他地區，被人類活動引入本地的生物","本地原有的生物種類","已經滅絕的生物","人工培育的新品種生物"], a:0 },
+  { q:"生態系是指環境和棲息在其中的生物所形成的系統，下列何者屬於生態系的組成？", opts:["環境和生物","只有動物和植物","只有非生物環境","只有食物鏈關係"], a:0 },
+  { q:"再生能源的共同特點是？", opts:["取之不盡、低碳排放","發電成本低且穩定","不受天氣影響","技術最成熟且最普及"], a:0 },
+  { q:"吉他和烏克麗麗都有音箱，音箱的主要功能是？", opts:["讓樂器發出的聲音變大","改變聲音的高低","改變聲音的音色","減少聲音的傳播"], a:0 },
+  { q:"地球表面約有多少比例是水域？", opts:["70%","30%","50%","80%"], a:0 },
+  { q:"自然資源中，哪些屬於蘊藏量有限、無法自然補充的資源？", opts:["金、銅、鐵等金屬礦產","陽光、風、地熱","水和生物資源","土壤（在合理使用下）"], a:0 },
+  { q:"吸管排笛是利用什麼原理發聲？", opts:["管內空氣柱振動","橡皮筋振動","鼓面振動","金屬片振動"], a:0 },
+  { q:"沙漠生態系的生物為了適應乾旱環境，通常具有什麼特徵？", opts:["耐旱、有儲存水分與養分的構造","需要大量水分才能生存","體型通常較小","只在夜間活動"], a:0 },
+  { q:"防治外來入侵種的正確做法是？", opts:["不隨意放生、不棄養、不放養","大量引進天敵來消滅入侵種","完全禁止引進任何外來生物","只在特定季節進行防治"], a:0 },
+  { q:"弦樂器中，固定琴弦長短和粗細，彈撥較緊的琴弦，音調會？", opts:["較高","較低","不變","視材質而定"], a:0 },
+  { q:"弦樂器發聲的原理是？", opts:["弦振動使空氣振動而發聲","空氣柱振動而發聲","敲擊樂器本身振動而發聲","吹氣使薄膜振動而發聲"], a:0 },
+  { q:"河口生態系的環境特色是？", opts:["鹽淡水交會，鹽分比例不斷變動","完全是淡水環境","完全是鹹水環境","水流速度非常快"], a:0 },
+  { q:"直笛管內空氣柱愈長，吹奏時發出的聲音？", opts:["音調愈低","音調愈高","響度愈大","音色改變"], a:0 },
+  { q:"玻璃瓶琴以吹奏方式演奏時，瓶內水位愈高（空氣柱愈短），發出的聲音？", opts:["音調愈高","音調愈低","響度愈大","音色改變"], a:0 },
+  { q:"玻璃瓶琴以敲擊方式演奏時，瓶內水量愈多，發出的聲音？", opts:["音調愈低","音調愈高","響度愈大","音色改變"], a:0 },
+  { q:"面對氣候變遷，「減緩」是指？", opts:["降低溫室氣體的排放量","調整適應氣候變遷的衝擊","增加綠地面積","改變農業種植方式"], a:0 },
+  { q:"音色決定於聲波的波形，下列何者具有不同的音色？", opts:["不同種類的樂器","同一把吉他的不同琴弦","同一支直笛的不同音孔","同一個鐵琴的不同琴鍵"], a:0 },
+  { q:"風力發電的缺點是？", opts:["風來源不穩，運轉產生噪音影響生物","會排放溫室氣體","需要大量水資源","建設成本極高且技術不成熟"], a:0 },
+  { q:"核能發電的特點是？", opts:["全天候穩定供電、碳排放低，但有核廢料問題","取之不盡、完全無汙染","發電成本最高","技術尚未成熟無法商業使用"], a:0 },
+  { q:"氣候變遷對臺灣的影響，下列何者正確？", opts:["極端高溫發生頻率增加","冬季天數增加","降雨分布更均勻","海平面持續下降"], a:0 },
+  { q:"烏克麗麗的琴頭上有旋鈕，旋轉旋鈕的主要目的是？", opts:["調整琴弦的鬆緊，改變音調","改變琴弦的長短，改變響度","改變音箱大小，改變音色","固定琴弦位置，防止鬆動"], a:0 },
+  { q:"循環經濟的核心理念是？", opts:["減少廢棄物、讓資源循環再利用","增加生產效率、降低成本","開發更多自然資源","提高經濟成長速度"], a:0 },
+  { q:"森林生態系中，細菌、菇類、黴菌等屬於食物鏈中的哪個角色？", opts:["分解者","生產者","消費者","掠食者"], a:0 },
+  { q:"超抽地下水可能造成哪些後果？", opts:["地層下陷和土壤鹽化","河川生態改變和橋墩裸露","海洋生物減少和漁獲量下降","空氣汙染和酸雨"], a:0 },
+  { q:"演奏弦樂器時，固定琴弦的粗細和鬆緊，彈撥較長的琴弦，發出的聲音？", opts:["音調較低","音調較高","響度較大","響度較小"], a:0 },
+  { q:"演奏烏克麗麗時，弦愈短、愈細、愈緊，發出的聲音？", opts:["音調愈高","音調愈低","響度愈大","響度愈小"], a:0 },
+  { q:"碳足跡是指？", opts:["人類活動所產生的溫室氣體總量","人類走路留下的足跡","碳元素在自然界的循環量","工廠排放廢水的總量"], a:0 },
+  { q:"管樂器的發聲原理是？", opts:["管內空氣柱振動而發聲","弦振動而發聲","敲擊樂器本身而發聲","電流通過而發聲"], a:0 },
+  { q:"臺灣因地形複雜，生物生存的環境多樣性高，因此臺灣的？", opts:["生物種類繁多","生物種類稀少","只有高山生態系","只有海洋生態系"], a:0 },
+  { q:"臺灣高山凍原的環境特色是？", opts:["海拔3600公尺以上，低溫、強風、土壤貧瘠","氣候溫暖濕潤，植物茂盛","雨量充沛，河流眾多","四面環海，海風強勁"], a:0 },
+  { q:"製作可以演奏不同高低聲音的管樂器，可以考慮改變哪個因素？", opts:["管內空氣柱的長短","管子的顏色","管子的材質","管子的重量"], a:0 },
+  { q:"製作吸管排笛時，吸管內空氣柱愈短，發出的聲音？", opts:["音調愈高","音調愈低","響度愈大","音色改變"], a:0 },
+  { q:"製作氣球鼓時，鼓面面積愈小、鼓面愈緊，發出的聲音？", opts:["音調愈高","音調愈低","響度愈大","音色改變"], a:0 },
+  { q:"製作紙盒吉他時，下列哪種操作可以讓橡皮筋發出較低的音調？", opts:["使用較粗且較長的橡皮筋","使用較細且較短的橡皮筋","將橡皮筋拉得更緊","使用彈性更好的橡皮筋"], a:0 },
+  { q:"製作紙盒吉他時，橡皮筋振動範圍愈短、橡皮筋愈細，發出的聲音？", opts:["音調愈高","音調愈低","響度愈大","響度愈小"], a:0 },
+  { q:"聲音的大小又稱為響度，下列何者會影響響度的大小？", opts:["演奏時用力的大小","空氣柱的長短","琴弦的粗細","音孔的位置"], a:0 },
+  { q:"聲音的高低又稱為音調，決定音調高低的主要原因是？", opts:["發音物體振動的頻率","發音物體振動的振幅","聲音傳播的介質","聲音傳播的距離"], a:0 },
+  { q:"關於聲音三要素的敘述，下列何者錯誤？", opts:["音調是指聲音傳播的速度","音色是聲音獨特的特質","響度是聲音的大小","音調是聲音的高低"], a:0 },
+  { q:"鐵琴和木琴的發聲方式是？", opts:["用琴槌敲擊琴鍵，使琴鍵振動發聲","用弓摩擦琴弦，使琴弦振動發聲","向管中吹氣，使空氣柱振動發聲","用手撥弦，使琴弦振動發聲"], a:0 },
+  { q:"鐵琴的琴鍵愈長，敲打後發出的聲音？", opts:["音調愈低","音調愈高","響度愈小","音色改變"], a:0 },
+];
+
+// ════════════════════════════════════════════════════════════
+//  AUDIO ENGINE
+// ════════════════════════════════════════════════════════════
+let AC = null;
+
+function getAC() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+function tone(freq, dur, type='square', vol=0.3, delay=0) {
+  const ac = getAC();
+  const osc = ac.createOscillator();
+  const g   = ac.createGain();
+  osc.connect(g); g.connect(ac.destination);
+  osc.type = type; osc.frequency.value = freq;
+  const t = ac.currentTime + delay;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.start(t); osc.stop(t + dur + 0.01);
+}
+
+function sfxCorrect() {
+  [523,659,784,1047].forEach((f,i)=> tone(f,0.12,'square',0.35,i*0.09));
+}
+
+function sfxWrong() {
+  tone(200,0.12,'sawtooth',0.4);
+  tone(150,0.15,'sawtooth',0.35,0.12);
+}
+
+function sfxHit() {
+  tone(80,0.08,'square',0.5);
+  tone(110,0.12,'sawtooth',0.35,0.06);
+}
+
+function sfxWin() {
+  const melody=[523,659,784,1047,1047,784,1047];
+  melody.forEach((f,i)=> tone(f,0.18,'square',0.4,i*0.14));
+}
+
+let bgmTimeout = null;
+
+function startBGM() {
+  stopBGM();
+  const notes=[330,392,440,392,330,294,262,294,330,392,440,523,494,440,392,330,
+               330,294,262,294,262,220,196,220,262,294,330,392,349,330,294,262];
+  const bpm=150, bd=60/bpm;
+  const ac=getAC();
+  notes.forEach((f,i)=>{
+    const osc=ac.createOscillator(),g=ac.createGain();
+    osc.connect(g); g.connect(ac.destination);
+    osc.type='square'; osc.frequency.value=f;
+    const t=ac.currentTime+i*bd;
+    g.gain.setValueAtTime(0.07,t);
+    g.gain.setValueAtTime(0.001,t+bd*0.75);
+    osc.start(t); osc.stop(t+bd);
+  });
+  bgmTimeout=setTimeout(()=>{ if(GS&&GS.phase==='game') startBGM(); }, notes.length*bd*1000-200);
+}
+
+function stopBGM() { if(bgmTimeout){ clearTimeout(bgmTimeout); bgmTimeout=null; } }
+
+// ════════════════════════════════════════════════════════════
+//  CANVAS – BATTLE SCENE
+// ════════════════════════════════════════════════════════════
+let canvas, ctx;
+let p1Anim = {state:'idle', t:0};  // state: idle|attack|hurt|faint
+let p2Anim = {state:'idle', t:0};
+
+// Pre-load AI-generated images (fall back to procedural drawing if missing)
+const imgBG = new Image(); imgBG.src = 'images/arena_bg.png';
+const imgF1 = new Image(); imgF1.src = 'images/fighter1.png';
+const imgF2 = new Image(); imgF2.src = 'images/fighter2.png';
+
+function initCanvas() {
+  canvas = document.getElementById('battleCanvas');
+  ctx = canvas.getContext('2d');
+  function resize(){
+    const area = document.getElementById('battleArea');
+    canvas.width = area.clientWidth;
+    canvas.height = area.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+function setAnim(who, state) {
+  if(who==='p1'){ p1Anim.state=state; p1Anim.t=performance.now(); }
+  else          { p2Anim.state=state; p2Anim.t=performance.now(); }
+}
+
+function drawArena(ts) {
+  if(!ctx) return;
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // Background: AI image or procedural fallback
+  if(imgBG.complete && imgBG.naturalWidth>0){
+    ctx.drawImage(imgBG,0,0,w,h);
+    // Subtle dark overlay on bottom half to make fighters pop
+    const ov=ctx.createLinearGradient(0,h*0.45,0,h);
+    ov.addColorStop(0,'rgba(0,0,0,0)');
+    ov.addColorStop(1,'rgba(0,0,0,0.25)');
+    ctx.fillStyle=ov; ctx.fillRect(0,h*0.45,w,h*0.55);
+  } else {
+    // Procedural fallback
+    const sky=ctx.createLinearGradient(0,0,0,h*0.62);
+    sky.addColorStop(0,'#6ab0d8'); sky.addColorStop(1,'#b8ddf0');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,w,h*0.62);
+    drawCloud(ctx,w*0.12,h*0.08,80,25);
+    drawCloud(ctx,w*0.55,h*0.05,110,30);
+    drawCloud(ctx,w*0.82,h*0.12,70,20);
+    drawShip(ctx,w,h);
+    const floor=ctx.createLinearGradient(0,h*0.62,0,h);
+    floor.addColorStop(0,'#A0632A'); floor.addColorStop(1,'#7B4A1E');
+    ctx.fillStyle=floor; ctx.fillRect(0,h*0.62,w,h*0.38);
+    ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1.5;
+    for(let x=0;x<w;x+=Math.max(40,w/18)){
+      ctx.beginPath(); ctx.moveTo(x,h*0.62); ctx.lineTo(x,h); ctx.stroke();
+    }
+    ctx.fillStyle='rgba(255,200,120,0.12)'; ctx.fillRect(0,h*0.62,w,6);
+  }
+
+  // Fighter positions
+  const px = h*0.65;
+  const p1x = w*0.24, p2x = w*0.76;
+
+  // Shadows
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  drawEllipse(ctx, p1x, px+5, 50,12);
+  drawEllipse(ctx, p2x, px+5, 50,12);
+
+  const t = ts/1000;
+
+  // Draw fighters
+  drawFighter(ctx, p1x, px, t, p1Anim, false, GS?GS.p1.hp:100);
+  drawFighter(ctx, p2x, px, t, p2Anim, true,  GS?GS.p2.hp:100);
+}
+
+function drawCloud(ctx,x,y,w,h){
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  ctx.beginPath(); ctx.ellipse(x,y,w/2,h/2,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x-w*0.25,y+h*0.1,w*0.32,h*0.4,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+w*0.27,y+h*0.1,w*0.28,h*0.38,0,0,Math.PI*2); ctx.fill();
+}
+
+function drawShip(ctx,w,h){
+  ctx.save();
+  // Hull
+  ctx.fillStyle='#7B4020';
+  ctx.beginPath();
+  ctx.moveTo(w*0.22,h*0.62); ctx.lineTo(w*0.15,h*0.38);
+  ctx.lineTo(w*0.35,h*0.30); ctx.lineTo(w*0.65,h*0.30);
+  ctx.lineTo(w*0.85,h*0.38); ctx.lineTo(w*0.78,h*0.62);
+  ctx.fill();
+  // Mast
+  ctx.fillStyle='#5A3015';
+  ctx.fillRect(w*0.488,h*0.03,w*0.024,h*0.30);
+  // Sail
+  ctx.fillStyle='rgba(240,235,215,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(w*0.50,h*0.05); ctx.lineTo(w*0.68,h*0.17); ctx.lineTo(w*0.50,h*0.29);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(w*0.50,h*0.07); ctx.lineTo(w*0.34,h*0.17); ctx.lineTo(w*0.50,h*0.27);
+  ctx.fill();
+  // Helm wheel
+  ctx.strokeStyle='#5A3015'; ctx.lineWidth=Math.max(4,w*0.008);
+  ctx.beginPath(); ctx.arc(w*0.5,h*0.44,w*0.04,0,Math.PI*2); ctx.stroke();
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(w*0.5,h*0.44);
+    ctx.lineTo(w*0.5+Math.cos(a)*w*0.04, h*0.44+Math.sin(a)*w*0.04);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawEllipse(ctx,x,y,rx,ry){
+  ctx.beginPath(); ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2); ctx.fill();
+}
+
+function drawFighter(ctx, x, y, t, anim, flip, hp){
+  ctx.save();
+
+  const age = (performance.now() - anim.t)/1000;
+  const st  = anim.state;
+  const who = flip ? 'p2' : 'p1';
+
+  // Idle bounce
+  let dy = Math.sin(t*(flip?3.3:3)+(flip?1:0))*4;
+  let dx = 0;
+  let rotate = 0;
+
+  if(st==='attack'){
+    const prog = Math.min(age/0.4, 1);
+    dx = (flip?-1:1) * Math.sin(prog*Math.PI) * 35;
+    if(age>0.45) setAnim(who,'idle');
+  }
+  if(st==='hurt'){
+    dx = Math.sin(age*45)*12*(1-Math.min(age/0.5,1));
+    if(age>0.5) setAnim(who,'idle');
+  }
+  if(st==='faint'){
+    dy = 0;
+    rotate = (flip?-1:1) * Math.min(age*2.5, Math.PI/2);
+  }
+
+  ctx.translate(x+dx, y+dy);
+  if(rotate) ctx.rotate(rotate);
+
+  // Low HP: red tint flicker
+  if(hp<=30 && hp>0 && st!=='faint'){
+    ctx.globalAlpha = 0.55+0.45*Math.sin(t*14);
+  }
+  // Hurt flash
+  if(st==='hurt' && age<0.3){
+    ctx.filter = 'brightness(3) saturate(0)';
+  }
+
+  // Use AI image if loaded, else procedural chibi
+  const imgSrc = flip ? imgF2 : imgF1;
+  const H = 160; // draw height in px
+  const W = H;
+
+  if(imgSrc.complete && imgSrc.naturalWidth>0){
+    // AI image: draw centered, mirrored for P2
+    ctx.save();
+    if(flip) ctx.scale(-1,1);  // flip P2 image to face right
+    ctx.drawImage(imgSrc, -W/2, -H, W, H);
+    ctx.restore();
+  } else {
+    // Procedural fallback
+    if(flip){ ctx.save(); ctx.scale(-1,1); drawChibi2(ctx); ctx.restore(); }
+    else     { drawChibi1(ctx); }
+  }
+
+  ctx.restore();
+}
+
+// ──── Chibi character 1: Blue-hair punk
+function drawChibi1(ctx){
+  const s=1;
+  // Legs
+  ctx.fillStyle='#2244BB'; roundRect(ctx,-18,40,14,38,5); roundRect(ctx,5,40,14,38,5);
+  // Shoes
+  ctx.fillStyle='#111'; roundRect(ctx,-20,72,16,8,4); roundRect(ctx,3,72,16,8,4);
+  // Body
+  ctx.fillStyle='#CC3300'; ctx.beginPath(); ctx.ellipse(0,18,22,28,0,0,Math.PI*2); ctx.fill();
+  // Star
+  ctx.fillStyle='#FFD700'; star(ctx,-5,12,4,8);
+  // Arms
+  ctx.fillStyle='#CC3300';
+  ctx.save(); ctx.translate(-24,5); ctx.rotate(-0.6);
+  roundRect(ctx,-7,0,14,22,6); ctx.restore();
+  ctx.save(); ctx.translate(24,8); ctx.rotate(0.3);
+  roundRect(ctx,-6,0,13,20,6); ctx.restore();
+  // Fist
+  ctx.fillStyle='#FFCBA4';
+  ctx.save(); ctx.translate(-24,5); ctx.rotate(-0.6);
+  ctx.beginPath(); ctx.arc(0,-2,9,0,Math.PI*2); ctx.fill(); ctx.restore();
+  // Head
+  ctx.fillStyle='#FFCBA4'; ctx.beginPath(); ctx.arc(0,-25,26,0,Math.PI*2); ctx.fill();
+  // Hair (blue spiky)
+  ctx.fillStyle='#1155FF';
+  ctx.beginPath();
+  ctx.moveTo(-26,-22); ctx.lineTo(-18,-58); ctx.lineTo(-8,-33);
+  ctx.lineTo(0,-65); ctx.lineTo(8,-33); ctx.lineTo(18,-55); ctx.lineTo(26,-22);
+  ctx.fill();
+  ctx.strokeStyle='#0033BB'; ctx.lineWidth=1.5;
+  ctx.stroke();
+  // Eye patch
+  ctx.fillStyle='#222'; roundRect(ctx,-24,-37,20,12,3);
+  ctx.fillStyle='#ff3300'; ctx.beginPath(); ctx.arc(-14,-31,5,0,Math.PI*2); ctx.fill();
+  // Right eye
+  ctx.fillStyle='white'; ctx.beginPath(); ctx.ellipse(13,-30,9,10,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#222';  ctx.beginPath(); ctx.arc(13,-30,6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(15,-33,2.5,0,Math.PI*2); ctx.fill();
+  // Grin
+  ctx.strokeStyle='#555'; ctx.lineWidth=2.5; ctx.beginPath();
+  ctx.moveTo(-8,-12); ctx.quadraticCurveTo(2,-6,12,-12); ctx.stroke();
+}
+
+// ──── Chibi character 2: White-hair samurai
+function drawChibi2(ctx){
+  // Legs
+  ctx.fillStyle='#111122'; roundRect(ctx,-18,40,14,38,5); roundRect(ctx,5,40,14,38,5);
+  // Sandals
+  ctx.fillStyle='#8B6040'; roundRect(ctx,-20,72,16,8,4); roundRect(ctx,3,72,16,8,4);
+  // Robe body
+  ctx.fillStyle='#1A1A2E'; ctx.beginPath(); ctx.ellipse(0,18,22,28,0,0,Math.PI*2); ctx.fill();
+  // Sash (white collar)
+  ctx.fillStyle='#EEFFEE';
+  ctx.beginPath(); ctx.moveTo(-10,-2); ctx.lineTo(0,14); ctx.lineTo(10,-2); ctx.fill();
+  // Green stripe
+  ctx.fillStyle='#22AA55';
+  ctx.beginPath(); ctx.moveTo(-5,2); ctx.lineTo(0,12); ctx.lineTo(5,2); ctx.fill();
+  // Arms
+  ctx.fillStyle='#1A1A2E';
+  ctx.save(); ctx.translate(-24,5); ctx.rotate(-0.3);
+  roundRect(ctx,-7,0,14,22,6); ctx.restore();
+  ctx.save(); ctx.translate(24,8); ctx.rotate(0.4);
+  roundRect(ctx,-6,0,13,20,6); ctx.restore();
+  // Sword
+  ctx.save(); ctx.translate(22,-5); ctx.rotate(-0.25);
+  ctx.fillStyle='#8B4513'; roundRect(ctx,-3,12,6,22,2);
+  ctx.fillStyle='#AAA'; roundRect(ctx,-7,10,14,5,2);
+  ctx.fillStyle='#CCC';
+  ctx.beginPath(); ctx.moveTo(-2,15); ctx.lineTo(2,15); ctx.lineTo(1,-48); ctx.lineTo(-1,-48); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.moveTo(0,15); ctx.lineTo(1.5,15); ctx.lineTo(0,-48); ctx.fill();
+  ctx.restore();
+  // Head
+  ctx.fillStyle='#F0E0CC'; ctx.beginPath(); ctx.arc(0,-25,26,0,Math.PI*2); ctx.fill();
+  // White spiky hair
+  ctx.fillStyle='#CCDDEE';
+  ctx.beginPath();
+  ctx.moveTo(-26,-22); ctx.lineTo(-17,-58); ctx.lineTo(-5,-40);
+  ctx.lineTo(4,-65); ctx.lineTo(14,-45); ctx.lineTo(24,-55); ctx.lineTo(26,-22);
+  ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.6)'; // highlight
+  ctx.beginPath();
+  ctx.moveTo(-12,-38); ctx.lineTo(-3,-56); ctx.lineTo(5,-40); ctx.fill();
+  // Eyes (sharp cyan)
+  ctx.fillStyle='#88CCFF'; ctx.beginPath(); ctx.ellipse(-13,-29,9,7,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(13,-29,9,7,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#113355'; ctx.beginPath(); ctx.arc(-13,-29,5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(13,-29,5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(-11,-32,2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(15,-32,2,0,Math.PI*2); ctx.fill();
+  // Stern mouth
+  ctx.strokeStyle='#666'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(-8,-13); ctx.lineTo(8,-13); ctx.stroke();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+
+function star(ctx,x,y,r1,r2){
+  ctx.beginPath();
+  for(let i=0;i<10;i++){
+    const r=i%2===0?r2:r1;
+    const a=(i/10)*Math.PI*2-Math.PI/2;
+    if(i===0) ctx.moveTo(x+r*Math.cos(a),y+r*Math.sin(a));
+    else ctx.lineTo(x+r*Math.cos(a),y+r*Math.sin(a));
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════════════════════
+const HP_MAX  = 100;
+const DAMAGE  = 20;
+const STUN_S  = 3;
+const Q_TIME  = 30;
+const CIRCLES = ['①','②','③','④'];
+let GS = null;
+let timerTick = null;
+let rafId     = null;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function showTitle(){
+  stopBGM();
+  clearInterval(timerTick);
+  if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+  GS=null;
+  document.getElementById('titleScreen').style.display='flex';
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='none';
+}
+
+function startGame(){
+  getAC(); // unlock audio
+  const n1=document.getElementById('p1name').value.trim()||'玩家一';
+  const n2=document.getElementById('p2name').value.trim()||'玩家二';
+
+  GS={
+    phase:'game',
+    p1:{ name:n1, hp:HP_MAX, q:null, answered:false, stunEnd:0, qStart:0, score:0 },
+    p2:{ name:n2, hp:HP_MAX, q:null, answered:false, stunEnd:0, qStart:0, score:0 },
+    pool: shuffle(QUESTIONS),
+    poolIdx:0,
+  };
+
+  p1Anim={state:'idle',t:0};
+  p2Anim={state:'idle',t:0};
+
+  document.getElementById('badge1').textContent=n1+' 製作';
+  document.getElementById('badge2').textContent=n2+' 製作';
+  document.getElementById('qlabel1').textContent=n1;
+  document.getElementById('qlabel2').textContent=n2;
+
+  document.getElementById('titleScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='flex';
+
+  document.getElementById('stun1').classList.remove('on');
+  document.getElementById('stun2').classList.remove('on');
+
+  initCanvas();
+  updateHP();
+  assignQ('p1');
+  assignQ('p2');
+
+  startBGM();
+  clearInterval(timerTick);
+  timerTick=setInterval(tickTimers,100);
+  if(rafId) cancelAnimationFrame(rafId);
+  function loop(ts){ if(GS&&GS.phase==='game'){ drawArena(ts); rafId=requestAnimationFrame(loop); } }
+  rafId=requestAnimationFrame(loop);
+}
+
+function getQ(){
+  if(GS.poolIdx>=GS.pool.length){
+    GS.pool=shuffle(QUESTIONS); GS.poolIdx=0;
+  }
+  return GS.pool[GS.poolIdx++];
+}
+
+function assignQ(who){
+  const p=GS[who], num=who==='p1'?'1':'2';
+  const isP2=who==='p2';
+  p.q=getQ(); p.answered=false; p.qStart=Date.now();
+
+  document.getElementById('qtext'+num).textContent=p.q.q;
+  document.getElementById('timer'+num).style.width='100%';
+
+  const container=document.getElementById('qopts'+num);
+  container.innerHTML='';
+  p.q.opts.forEach((opt,i)=>{
+    const div=document.createElement('div');
+    div.className='q-opt';
+    div.id=`${who}opt${i}`;
+    div.innerHTML=`<span class="opt-circle">${CIRCLES[i]}</span><span>${opt}</span>`;
+    div.addEventListener('click',()=>answer(who,i));
+    container.appendChild(div);
+  });
+}
+
+function answer(who, choice){
+  if(!GS||GS.phase!=='game') return;
+  const p=GS[who];
+  if(p.stunned||p.answered) return;
+  p.answered=true;
+
+  const other=who==='p1'?'p2':'p1';
+  const num=who==='p1'?'1':'2';
+  const correct=choice===p.q.a;
+
+  // Highlight selected
+  const selEl=document.getElementById(`${who}opt${choice}`);
+  if(selEl) selEl.classList.add('selected');
+
+  setTimeout(()=>{
+    if(!GS||GS.phase!=='game') return;
+    // Show answer feedback
+    document.getElementById(`${who}opt${p.q.a}`).classList.add('correct');
+    if(!correct && selEl) selEl.classList.add('wrong');
+
+    setTimeout(()=>{
+      if(!GS||GS.phase!=='game') return;
+
+      if(correct){
+        p.score++;
+        sfxCorrect();
+        setAnim(who, 'attack');
+        setTimeout(()=>setAnim(who,'idle'), 500);
+        setAnim(other, 'hurt');
+        setTimeout(()=>setAnim(other,'idle'), 500);
+        sfxHit();
+        GS[other].hp=Math.max(0, GS[other].hp-DAMAGE);
+        updateHP();
+        showMsg(`${p.name} 答對！💥`);
+
+        if(GS[other].hp<=0){
+          setTimeout(()=>endGame(who),1000);
+          return;
+        }
+      } else {
+        sfxWrong();
+        p.stunned=true;
+        p.stunEnd=Date.now()+STUN_S*1000;
+        document.getElementById('stun'+num).classList.add('on');
+        showMsg(`${p.name} 答錯了😵`);
+      }
+
+      setTimeout(()=>{
+        if(!GS||GS.phase!=='game') return;
+        assignQ(who);
+      }, correct?300:100);
+
+    }, 500);
+  }, 150);
+}
+
+function tickTimers(){
+  if(!GS||GS.phase!=='game') return;
+  const now=Date.now();
+  ['p1','p2'].forEach(who=>{
+    const p=GS[who], num=who==='p1'?'1':'2';
+    // Stun
+    if(p.stunned){
+      const rem=Math.ceil((p.stunEnd-now)/1000);
+      document.getElementById('stunnum'+num).textContent=Math.max(0,rem);
+      if(now>=p.stunEnd){
+        p.stunned=false;
+        document.getElementById('stun'+num).classList.remove('on');
+      }
+    }
+    // Timer bar
+    if(!p.answered&&p.qStart){
+      const elapsed=(now-p.qStart)/1000;
+      const pct=Math.max(0,100-(elapsed/Q_TIME*100));
+      document.getElementById('timer'+num).style.width=pct+'%';
+      if(elapsed>=Q_TIME&&!p.answered){
+        p.answered=true;
+        showMsg('⏰ 時間到！');
+        setTimeout(()=>{ if(GS&&GS.phase==='game') assignQ(who); },600);
+      }
+    }
+  });
+}
+
+function updateHP(){
+  if(!GS) return;
+  const pct1=GS.p1.hp/HP_MAX, pct2=GS.p2.hp/HP_MAX;
+  const bar1=document.getElementById('hp1fill');
+  const bar2=document.getElementById('hp2fill');
+  bar1.style.width=(pct1*100)+'%';
+  bar2.style.width=(pct2*100)+'%';
+  bar1.style.background=hpGradient(pct1,'right');
+  bar2.style.background=hpGradient(pct2,'left');
+  document.getElementById('hpnum1').textContent=GS.p1.hp;
+  document.getElementById('hpnum2').textContent=GS.p2.hp;
+}
+
+function hpGradient(pct,dir){
+  if(pct>0.6) return `linear-gradient(to ${dir},#00cc00,#88ff00)`;
+  if(pct>0.3) return `linear-gradient(to ${dir},#cc7700,#ffcc00)`;
+  return `linear-gradient(to ${dir},#cc0000,#ff4400)`;
+}
+
+let msgT=null;
+function showMsg(txt){
+  const el=document.getElementById('msgPopup');
+  el.textContent=txt; el.style.display='block';
+  clearTimeout(msgT);
+  msgT=setTimeout(()=>el.style.display='none',1600);
+}
+
+function endGame(winner){
+  if(!GS||GS.phase!=='game') return;
+  GS.phase='result';
+  clearInterval(timerTick); stopBGM();
+  sfxWin();
+  setAnim(winner==='p1'?'p2':'p1','faint');
+
+  setTimeout(()=>{
+    document.getElementById('winText').textContent=`🎉 ${GS[winner].name} 獲勝！`;
+    document.getElementById('winScore').innerHTML=
+      `${GS.p1.name}：答對 <b>${GS.p1.score}</b> 題　|　${GS.p2.name}：答對 <b>${GS.p2.score}</b> 題`;
+    document.getElementById('gameScreen').style.display='none';
+    document.getElementById('resultScreen').style.display='flex';
+  },1800);
+}
+
+// ════════════════════════════════════════════════════════════
+//  INPUT HANDLING
+// ════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if(!GS||GS.phase!=='game') return;
+  const k=e.key;
+  if(k==='1') answer('p1',0);
+  else if(k==='2') answer('p1',1);
+  else if(k==='3') answer('p1',2);
+  else if(k==='4') answer('p1',3);
+  else if(k==='7') answer('p2',0);
+  else if(k==='8') answer('p2',1);
+  else if(k==='9') answer('p2',2);
+  else if(k==='0') answer('p2',3);
+});
+
+// Start with title
+showTitle();
+document.getElementById('titleScreen').style.display='flex';
+</script>
+</body>
+</html>
