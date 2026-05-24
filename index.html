@@ -118,50 +118,98 @@
 
     /* HP BAR AREA */
     #hpArea {
-      display: flex; align-items: center; gap: 6px;
-      background: linear-gradient(to bottom, #6a0000, #4a0000);
-      padding: 8px 12px;
-      border-bottom: 3px solid #2a0000;
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(to bottom, #7a0000, #4a0000);
+      padding: 10px 14px;
+      border-bottom: 4px solid #2a0000;
       flex-shrink: 0;
     }
 
     .hp-wrap { flex: 1; position: relative; }
 
+    .hp-name {
+      font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+      font-weight: bold; color: #FFD700;
+      margin-bottom: 3px;
+    }
+    #hpname2 { text-align: right; }
+
     .hp-track {
-      height: 22px;
-      background: #1a0000;
-      border-radius: 4px;
+      height: 28px;
+      background: #111;
+      border-radius: 6px;
       overflow: hidden;
-      border: 1px solid #550000;
+      border: 2px solid #550000;
+      position: relative;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
     }
 
+    /* P1 bar fills left→right */
     #hp1fill {
       height: 100%; width: 100%;
       background: linear-gradient(to right, #00cc00, #88ff00);
       border-radius: 4px;
-      transition: width 0.4s ease, background 0.4s ease;
+      transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  background 0.5s ease;
+      position: relative;
+    }
+    #hp1fill::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, transparent 60%);
+      border-radius: 4px;
     }
 
+    /* P2 bar fills right→left using position absolute */
+    .hp-track-p2 { direction: rtl; }
     #hp2fill {
       height: 100%; width: 100%;
       background: linear-gradient(to left, #00cc00, #88ff00);
       border-radius: 4px;
-      float: right;
-      transition: width 0.4s ease, background 0.4s ease;
+      transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  background 0.5s ease;
+      position: relative;
+    }
+    #hp2fill::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, transparent 60%);
+      border-radius: 4px;
     }
 
-    .hp-label {
+    .hp-num {
       position: absolute; top: 50%; transform: translateY(-50%);
-      color: rgba(255,255,255,0.8); font-size: 0.65rem; font-weight: bold;
-      pointer-events: none; z-index: 1;
+      color: white; font-size: 0.75rem; font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
+      pointer-events: none; z-index: 2;
     }
-    #hpnum1 { right: 4px; }
-    #hpnum2 { left: 4px; }
+    #hpnum1 { right: 6px; }
+    #hpnum2 { left: 6px; }
+
+    /* Flash red when HP decreases */
+    @keyframes hpFlash {
+      0%   { box-shadow: inset 0 0 0 4px #ff0000, 0 0 20px #ff0000; }
+      100% { box-shadow: none; }
+    }
+    .hp-hit { animation: hpFlash 0.5s ease-out; }
+
+    /* Floating damage number */
+    .dmg-float {
+      position: absolute; pointer-events: none; z-index: 60;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 900;
+      color: #ff2200;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+      animation: floatUp 1s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateY(0) scale(1.2); }
+      60%  { opacity: 1; transform: translateY(-50px) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+    }
 
     #centerInfo {
       color: #FFD700; font-size: 1rem; font-weight: bold;
-      white-space: nowrap; padding: 0 8px; text-align: center;
-      min-width: 80px;
+      white-space: nowrap; padding: 0 6px; text-align: center;
+      min-width: 60px;
     }
 
     /* BATTLE AREA */
@@ -361,17 +409,19 @@
   <!-- HP Bars -->
   <div id="hpArea">
     <div class="hp-wrap">
+      <div class="hp-name p1-color" id="hpname1">玩家一</div>
       <div class="hp-track">
         <div id="hp1fill"></div>
+        <span class="hp-num" id="hpnum1">100</span>
       </div>
-      <span class="hp-label" id="hpnum1">100</span>
     </div>
     <div id="centerInfo">⚔️</div>
     <div class="hp-wrap">
-      <div class="hp-track">
+      <div class="hp-name p2-color" id="hpname2">玩家二</div>
+      <div class="hp-track hp-track-p2">
         <div id="hp2fill"></div>
+        <span class="hp-num" id="hpnum2">100</span>
       </div>
-      <span class="hp-label" id="hpnum2">100</span>
     </div>
   </div>
 
@@ -716,15 +766,13 @@ function drawFighter(ctx, x, y, t, anim, flip, hp){
 
   // Use AI image if loaded, else procedural chibi
   const imgSrc = flip ? imgF2 : imgF1;
-  const H = 160; // draw height in px
+  // Height scales with canvas height so fighters look proportional
+  const H = Math.round(canvas.height * 0.55);
   const W = H;
 
   if(imgSrc.complete && imgSrc.naturalWidth>0){
-    // AI image: draw centered, mirrored for P2
-    ctx.save();
-    if(flip) ctx.scale(-1,1);  // flip P2 image to face right
+    // AI images: fighter1 faces RIGHT, fighter2 faces LEFT — both correct, no extra flip
     ctx.drawImage(imgSrc, -W/2, -H, W, H);
-    ctx.restore();
   } else {
     // Procedural fallback
     if(flip){ ctx.save(); ctx.scale(-1,1); drawChibi2(ctx); ctx.restore(); }
@@ -897,6 +945,8 @@ function startGame(){
   document.getElementById('badge2').textContent=n2+' 製作';
   document.getElementById('qlabel1').textContent=n1;
   document.getElementById('qlabel2').textContent=n2;
+  document.getElementById('hpname1').textContent=n1;
+  document.getElementById('hpname2').textContent=n2;
 
   document.getElementById('titleScreen').style.display='none';
   document.getElementById('resultScreen').style.display='none';
@@ -977,7 +1027,7 @@ function answer(who, choice){
         setTimeout(()=>setAnim(other,'idle'), 500);
         sfxHit();
         GS[other].hp=Math.max(0, GS[other].hp-DAMAGE);
-        updateHP();
+        updateHP(other);
         showMsg(`${p.name} 答對！💥`);
 
         if(GS[other].hp<=0){
@@ -1029,23 +1079,52 @@ function tickTimers(){
   });
 }
 
-function updateHP(){
+function updateHP(hitPlayer){
   if(!GS) return;
   const pct1=GS.p1.hp/HP_MAX, pct2=GS.p2.hp/HP_MAX;
   const bar1=document.getElementById('hp1fill');
   const bar2=document.getElementById('hp2fill');
+
   bar1.style.width=(pct1*100)+'%';
   bar2.style.width=(pct2*100)+'%';
   bar1.style.background=hpGradient(pct1,'right');
   bar2.style.background=hpGradient(pct2,'left');
   document.getElementById('hpnum1').textContent=GS.p1.hp;
   document.getElementById('hpnum2').textContent=GS.p2.hp;
+
+  // Flash the track that got hit
+  if(hitPlayer){
+    const trackId = hitPlayer==='p1' ? 'hp1fill' : 'hp2fill';
+    const track = document.getElementById(trackId).parentElement;
+    track.classList.remove('hp-hit');
+    void track.offsetWidth; // force reflow
+    track.classList.add('hp-hit');
+    setTimeout(()=>track.classList.remove('hp-hit'), 500);
+
+    // Floating damage number over the fighter
+    showDamageNum(hitPlayer);
+  }
+}
+
+function showDamageNum(who){
+  const area = document.getElementById('battleArea');
+  const w = area.clientWidth, h = area.clientHeight;
+  const x = who==='p1' ? w*0.24 : w*0.76;
+  const y = h * 0.35;
+
+  const el = document.createElement('div');
+  el.className = 'dmg-float';
+  el.textContent = '-'+DAMAGE+'💥';
+  el.style.left = (x - 40)+'px';
+  el.style.top  = y+'px';
+  area.appendChild(el);
+  setTimeout(()=>el.remove(), 1000);
 }
 
 function hpGradient(pct,dir){
-  if(pct>0.6) return `linear-gradient(to ${dir},#00cc00,#88ff00)`;
-  if(pct>0.3) return `linear-gradient(to ${dir},#cc7700,#ffcc00)`;
-  return `linear-gradient(to ${dir},#cc0000,#ff4400)`;
+  if(pct>0.6) return `linear-gradient(to ${dir},#009900,#44ee00)`;
+  if(pct>0.3) return `linear-gradient(to ${dir},#bb6600,#ffcc00)`;
+  return `linear-gradient(to ${dir},#cc0000,#ff3300)`;
 }
 
 let msgT=null;
